@@ -7,6 +7,11 @@
             "label": "day1",
             "type": "shell",
             "command": "elm-cli run ./src/Main.elm 1"
+        },
+        {
+            "label": "day2",
+            "type": "shell",
+            "command": "elm-cli run ./src/Main.elm 2"
         }
     ]
 }

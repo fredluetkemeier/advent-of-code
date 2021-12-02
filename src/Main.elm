@@ -48,7 +48,7 @@ runSolution day =
                     IO.combine
                         [ values
                             |> Two.partOne
-                            |> String.append "Part 1:"
+                            |> String.append "Part 1: "
                             |> Process.print
                         ]
                 )
