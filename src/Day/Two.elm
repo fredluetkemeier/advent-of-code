@@ -34,13 +34,16 @@ getPosition : List Direction -> Position
 getPosition directions =
     case directions of
         (Forward value) :: tail ->
-            Tuple.mapFirst (\acc -> acc + value) (getPosition tail)
+            Tuple.mapFirst ((+) value) <|
+                getPosition tail
 
         (Down value) :: tail ->
-            Tuple.mapSecond (\acc -> acc + value) (getPosition tail)
+            Tuple.mapSecond ((+) value) <|
+                getPosition tail
 
         (Up value) :: tail ->
-            Tuple.mapSecond (\acc -> acc - value) (getPosition tail)
+            Tuple.mapSecond (\acc -> acc - value) <|
+                getPosition tail
 
         [] ->
             ( 0, 0 )
@@ -57,7 +60,7 @@ partTwo inputs =
             inputs
                 |> List.map parseDirection
                 |> Maybe.values
-                |> getPositionByAim
+                |> getPositionByAim 0
     in
     String.fromInt (x * y)
 
@@ -86,17 +89,21 @@ directionParser =
         ]
 
 
-getPositionByAim : List Direction -> Position
-getPositionByAim directions =
+getPositionByAim : Int -> List Direction -> Position
+getPositionByAim aim directions =
     case directions of
         (Forward value) :: tail ->
-            Tuple.mapFirst (\acc -> acc + value) (getPosition tail)
+            Tuple.mapBoth
+                ((+) value)
+                ((+) (value * aim))
+            <|
+                getPositionByAim aim tail
 
         (Down value) :: tail ->
-            Tuple.mapSecond (\acc -> acc + value) (getPosition tail)
+            getPositionByAim (aim + value) tail
 
         (Up value) :: tail ->
-            Tuple.mapSecond (\acc -> acc - value) (getPosition tail)
+            getPositionByAim (aim - value) tail
 
         [] ->
             ( 0, 0 )
