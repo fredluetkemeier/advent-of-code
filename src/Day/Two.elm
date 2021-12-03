@@ -14,21 +14,20 @@ type alias Position =
     ( Int, Int )
 
 
+
+-- PART ONE
+
+
 partOne : List String -> String
 partOne inputs =
     let
-        -- debug =
-        --     inputs
-        --         |> List.map parseDirection
-        --         |> Maybe.values
-        --         |> Debug.log "debug"
         ( x, y ) =
             inputs
                 |> List.map parseDirection
                 |> Maybe.values
                 |> calculatePosition
     in
-    String.fromInt x ++ " " ++ String.fromInt y
+    String.fromInt (x * y)
 
 
 parseDirection : String -> Maybe Direction
@@ -61,5 +60,15 @@ calculatePosition directions =
         (Forward value) :: tail ->
             Tuple.mapFirst (\acc -> acc + value) (calculatePosition tail)
 
-        _ ->
+        (Down value) :: tail ->
+            Tuple.mapSecond (\acc -> acc + value) (calculatePosition tail)
+
+        (Up value) :: tail ->
+            Tuple.mapSecond (\acc -> acc - value) (calculatePosition tail)
+
+        [] ->
             ( 0, 0 )
+
+
+
+-- PART TWO
