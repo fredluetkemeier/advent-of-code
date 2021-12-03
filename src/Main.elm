@@ -1,6 +1,7 @@
 module Main exposing (program)
 
 import Day.One as One
+import Day.Three as Three
 import Day.Two as Two
 import Posix.IO as IO exposing (IO, Process)
 import Posix.IO.File as File
