@@ -1,7 +1,7 @@
-module Day.Two exposing (partOne)
+module Day.Two exposing (partOne, partTwo)
 
 import Maybe.Extra as Maybe
-import Parser exposing ((|.), (|=), Parser, end, int, keyword, spaces, token)
+import Parser exposing ((|.), (|=), Parser, int, keyword, spaces)
 
 
 type Direction
@@ -25,7 +25,39 @@ partOne inputs =
             inputs
                 |> List.map parseDirection
                 |> Maybe.values
-                |> calculatePosition
+                |> getPosition
+    in
+    String.fromInt (x * y)
+
+
+getPosition : List Direction -> Position
+getPosition directions =
+    case directions of
+        (Forward value) :: tail ->
+            Tuple.mapFirst (\acc -> acc + value) (getPosition tail)
+
+        (Down value) :: tail ->
+            Tuple.mapSecond (\acc -> acc + value) (getPosition tail)
+
+        (Up value) :: tail ->
+            Tuple.mapSecond (\acc -> acc - value) (getPosition tail)
+
+        [] ->
+            ( 0, 0 )
+
+
+
+-- PART TWO
+
+
+partTwo : List String -> String
+partTwo inputs =
+    let
+        ( x, y ) =
+            inputs
+                |> List.map parseDirection
+                |> Maybe.values
+                |> getPositionByAim
     in
     String.fromInt (x * y)
 
@@ -54,21 +86,17 @@ directionParser =
         ]
 
 
-calculatePosition : List Direction -> Position
-calculatePosition directions =
+getPositionByAim : List Direction -> Position
+getPositionByAim directions =
     case directions of
         (Forward value) :: tail ->
-            Tuple.mapFirst (\acc -> acc + value) (calculatePosition tail)
+            Tuple.mapFirst (\acc -> acc + value) (getPosition tail)
 
         (Down value) :: tail ->
-            Tuple.mapSecond (\acc -> acc + value) (calculatePosition tail)
+            Tuple.mapSecond (\acc -> acc + value) (getPosition tail)
 
         (Up value) :: tail ->
-            Tuple.mapSecond (\acc -> acc - value) (calculatePosition tail)
+            Tuple.mapSecond (\acc -> acc - value) (getPosition tail)
 
         [] ->
             ( 0, 0 )
-
-
-
--- PART TWO

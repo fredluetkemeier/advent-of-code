@@ -50,6 +50,10 @@ runSolution day =
                             |> Two.partOne
                             |> String.append "Part 1: "
                             |> Process.print
+                        , values
+                            |> Two.partTwo
+                            |> String.append "Part 2: "
+                            |> Process.print
                         ]
                 )
 
