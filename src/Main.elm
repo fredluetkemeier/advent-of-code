@@ -38,7 +38,7 @@ solutionFromDay day =
 
         "3" ->
             IO.do (readFileLines "./inputs/day3-input1.txt") <|
-                executeParts [ Three.partOne ]
+                executeParts [ Three.partOne, Three.partTwo ]
 
         _ ->
             Process.logErr errorMessage
@@ -50,7 +50,10 @@ readFileLines : String -> IO (List String)
 readFileLines =
     File.contentsOf
         >> IO.exitOnError identity
-        >> IO.map (String.split "\n")
+        >> IO.map
+            (String.split "\n"
+                >> List.map (String.filter Char.isAlphaNum)
+            )
 
 
 executeParts : List (List String -> String) -> List String -> IO (List ())
