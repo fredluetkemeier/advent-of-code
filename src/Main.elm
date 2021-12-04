@@ -52,7 +52,7 @@ readFileLines =
         >> IO.exitOnError identity
         >> IO.map
             (String.split "\n"
-                >> List.map (String.filter Char.isAlphaNum)
+                >> List.map String.trim
             )
 
 
