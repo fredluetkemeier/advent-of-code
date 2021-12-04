@@ -1,7 +1,7 @@
 -- https://adventofcode.com/2021/day/3
 
 
-module Day.Three exposing (partOne)
+module Day.Three exposing (partOne, partTwo)
 
 import List.Extra as List
 import Maybe.Extra as Maybe
@@ -91,3 +91,12 @@ binaryToInt binary =
                         acc
             )
             0
+
+
+
+-- PART TWO
+
+
+partTwo : List String -> String
+partTwo inputs =
+    ""
