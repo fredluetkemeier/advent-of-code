@@ -18,45 +18,27 @@ handleArgs : List String -> IO ()
 handleArgs args =
     case args of
         [ _, day ] ->
-            IO.do (runSolution day)
+            IO.do (solutionFromDay day)
                 (\_ -> IO.return ())
 
         _ ->
             Process.logErr errorMessage
 
 
-runSolution : String -> IO (List ())
-runSolution day =
+solutionFromDay : String -> IO (List ())
+solutionFromDay day =
     case day of
         "1" ->
-            IO.do (readFileLines "./inputs/day1-input1.txt")
-                (\values ->
-                    IO.combine
-                        [ values
-                            |> One.partOne
-                            |> String.append "Part 1: "
-                            |> Process.print
-                        , values
-                            |> One.partTwo
-                            |> String.append "Part 2: "
-                            |> Process.print
-                        ]
-                )
+            IO.do (readFileLines "./inputs/day1-input1.txt") <|
+                executeParts [ One.partOne, One.partTwo ]
 
         "2" ->
-            IO.do (readFileLines "./inputs/day2-input1.txt")
-                (\values ->
-                    IO.combine
-                        [ values
-                            |> Two.partOne
-                            |> String.append "Part 1: "
-                            |> Process.print
-                        , values
-                            |> Two.partTwo
-                            |> String.append "Part 2: "
-                            |> Process.print
-                        ]
-                )
+            IO.do (readFileLines "./inputs/day2-input1.txt") <|
+                executeParts [ Two.partOne, Two.partTwo ]
+
+        "3" ->
+            IO.do (readFileLines "./inputs/day3-input1.txt") <|
+                executeParts [ Three.partOne ]
 
         _ ->
             Process.logErr errorMessage
@@ -69,6 +51,19 @@ readFileLines =
     File.contentsOf
         >> IO.exitOnError identity
         >> IO.map (String.split "\n")
+
+
+executeParts : List (List String -> String) -> List String -> IO (List ())
+executeParts parts inputs =
+    parts
+        |> List.indexedMap
+            (\index part ->
+                inputs
+                    |> part
+                    |> String.append ("Part " ++ String.fromInt (index + 1) ++ ": ")
+                    |> Process.print
+            )
+        |> IO.combine
 
 
 errorMessage : String
