@@ -73,26 +73,6 @@ invertBinary binary =
             )
 
 
-binaryToInt : List Int -> Int
-binaryToInt binary =
-    let
-        bitCount =
-            List.length binary
-    in
-    binary
-        |> List.indexedMap (\index val -> ( bitCount - index - 1, val ))
-        |> List.foldl
-            (\( power, val ) acc ->
-                case val of
-                    1 ->
-                        ((val * 2) ^ power) + acc
-
-                    _ ->
-                        acc
-            )
-            0
-
-
 
 -- PART TWO
 
@@ -103,38 +83,51 @@ partTwo inputs =
         binaries =
             inputs |> List.map binaryFromString
 
-        testInput =
-            [ "00100"
-            , "11110"
-            , "10110"
-            , "10111"
-            , "10101"
-            , "01111"
-            , "00111"
-            , "11100"
-            , "10000"
-            , "11001"
-            , "00010"
-            , "01010"
-            ]
-                |> List.map binaryFromString
+        oxygenRating =
+            binaries
+                |> getOxygenRating
+                |> binaryToInt
 
-        first =
-            getBitFrequency 0 testInput |> Debug.log "testMostCommon"
-
-        testOxyRating =
-            getOxygenRating 0 testInput |> Debug.log "testOxyRating"
-
-        -- testC02Rating =
-        --     getC02Rating 0 testInput |> Debug.log "testC02Rating"
-        -- oxygenRating =
-        --     getOxygenRating 0 binaries |> Debug.log "oxygenRating"
+        cO2Rating =
+            binaries
+                |> getCO2Rating
+                |> binaryToInt
     in
-    ""
+    String.fromInt (oxygenRating * cO2Rating)
 
 
-getOxygenRating : Int -> List (List Int) -> List Int
-getOxygenRating pos binaries =
+getOxygenRating : List (List Int) -> List Int
+getOxygenRating binaries =
+    getRatingBy
+        (\frequency ->
+            case frequency of
+                Frequency { mostCommon } ->
+                    mostCommon
+
+                Equal ->
+                    1
+        )
+        0
+        binaries
+
+
+getCO2Rating : List (List Int) -> List Int
+getCO2Rating binaries =
+    getRatingBy
+        (\frequency ->
+            case frequency of
+                Frequency { leastCommon } ->
+                    leastCommon
+
+                Equal ->
+                    0
+        )
+        0
+        binaries
+
+
+getRatingBy : (Frequency Int -> Int) -> Int -> List (List Int) -> List Int
+getRatingBy criteria pos binaries =
     case binaries of
         head :: [] ->
             head
@@ -142,12 +135,9 @@ getOxygenRating pos binaries =
         _ :: _ ->
             let
                 bitCriteria =
-                    case binaries |> getBitFrequency pos of
-                        Frequency { mostCommon } ->
-                            mostCommon
-
-                        Equal ->
-                            1
+                    binaries
+                        |> getBitFrequency pos
+                        |> criteria
             in
             binaries
                 |> List.filter
@@ -159,7 +149,7 @@ getOxygenRating pos binaries =
                             Nothing ->
                                 False
                     )
-                |> getOxygenRating (pos + 1)
+                |> getRatingBy criteria (pos + 1)
 
         [] ->
             []
@@ -194,8 +184,32 @@ getBitFrequency pos binaries =
             Equal
 
 
+
+-- HELPERS
+
+
 binaryFromString : String -> List Int
 binaryFromString =
     String.split ""
         >> List.map String.toInt
         >> Maybe.values
+
+
+binaryToInt : List Int -> Int
+binaryToInt binary =
+    let
+        bitCount =
+            List.length binary
+    in
+    binary
+        |> List.indexedMap (\index val -> ( bitCount - index - 1, val ))
+        |> List.foldl
+            (\( power, val ) acc ->
+                case val of
+                    1 ->
+                        ((val * 2) ^ power) + acc
+
+                    _ ->
+                        acc
+            )
+            0
