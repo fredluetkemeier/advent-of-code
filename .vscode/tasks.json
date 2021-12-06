@@ -17,6 +17,11 @@
             "label": "day3",
             "type": "shell",
             "command": "elm-cli run --debug ./src/Main.elm 3"
+        },
+        {
+            "label": "day4",
+            "type": "shell",
+            "command": "elm-cli run --debug ./src/Main.elm 4"
         }
     ]
 }

@@ -1,5 +1,6 @@
 module Main exposing (program)
 
+import Day.Four as Four
 import Day.One as One
 import Day.Three as Three
 import Day.Two as Two
@@ -29,16 +30,20 @@ solutionFromDay : String -> IO (List ())
 solutionFromDay day =
     case day of
         "1" ->
-            IO.do (readFileLines "./inputs/day1-input1.txt") <|
+            IO.do (readFile "./inputs/day1-input1.txt" |> splitLines) <|
                 executeParts [ One.partOne, One.partTwo ]
 
         "2" ->
-            IO.do (readFileLines "./inputs/day2-input1.txt") <|
+            IO.do (readFile "./inputs/day2-input1.txt" |> splitLines) <|
                 executeParts [ Two.partOne, Two.partTwo ]
 
         "3" ->
-            IO.do (readFileLines "./inputs/day3-input1.txt") <|
+            IO.do (readFile "./inputs/day3-input1.txt" |> splitLines) <|
                 executeParts [ Three.partOne, Three.partTwo ]
+
+        "4" ->
+            IO.do (readFile "./inputs/day3-input1.txt") <|
+                executeParts [ Four.partOne ]
 
         _ ->
             Process.logErr errorMessage
@@ -46,17 +51,21 @@ solutionFromDay day =
                 |> IO.combine
 
 
-readFileLines : String -> IO (List String)
-readFileLines =
+readFile : String -> IO String
+readFile =
     File.contentsOf
         >> IO.exitOnError identity
-        >> IO.map
-            (String.split "\n"
-                >> List.map String.trim
-            )
 
 
-executeParts : List (List String -> String) -> List String -> IO (List ())
+splitLines : IO String -> IO (List String)
+splitLines =
+    IO.map
+        (String.split "\n"
+            >> List.map String.trim
+        )
+
+
+executeParts : List (a -> String) -> a -> IO (List ())
 executeParts parts inputs =
     parts
         |> List.indexedMap
