@@ -11,6 +11,9 @@ testInput =
     """7,4,6
 
 22 13 17 11  0
+ 8  2 23  4 24
+
+22 13 17 11  0
  8  2 23  4 24"""
 
 
@@ -46,9 +49,7 @@ partOne fileContents =
 
 type alias Input =
     { drawNumbers : List Int
-    , board : Board
-
-    -- , boards : List Board
+    , boards : List Board
     }
 
 
@@ -65,7 +66,7 @@ parseInput =
     Parser.succeed Input
         |= parseDrawNumbers
         |. Parser.spaces
-        |= parseBoard
+        |= parseBoards
         |. Parser.end
 
 
@@ -85,12 +86,26 @@ parseDrawNumbers =
                 ]
 
 
+parseBoards : Parser (List Board)
+parseBoards =
+    Parser.loop [] <|
+        \boards ->
+            Parser.oneOf
+                [ -- Parser.succeed (Done (List.reverse boards))
+                  -- |. Parser.end
+                  Parser.succeed (\board -> Loop (board :: boards))
+                    |= parseBoard
+                , Parser.succeed ()
+                    |> Parser.map (\_ -> Done (List.reverse boards))
+                ]
+
+
 parseBoard : Parser Board
 parseBoard =
     Parser.loop [] <|
         \rows ->
             Parser.oneOf
-                [ Parser.succeed (Done rows)
+                [ Parser.succeed (Done (List.reverse rows))
                     |. Parser.end
                 , Parser.succeed (\row -> Loop (row :: rows))
                     |= parseRow
@@ -98,8 +113,9 @@ parseBoard =
                         [ newline
                         , Parser.succeed ()
                         ]
-                , Parser.succeed ()
-                    |> Parser.map (\_ -> Done (List.reverse rows))
+
+                -- , Parser.succeed ()
+                --     |> Parser.map (\_ -> Done (List.reverse rows))
                 ]
 
 
@@ -111,7 +127,6 @@ parseRow =
                 [ Parser.succeed (\num -> Loop (num :: numbers))
                     |. Parser.chompWhile (\c -> c == ' ')
                     |= Parser.int
-                    |. Parser.chompWhile (\c -> c == ' ')
                 , Parser.succeed ()
                     |> Parser.map (\_ -> Done (List.reverse numbers))
                 ]
