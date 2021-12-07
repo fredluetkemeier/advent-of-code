@@ -90,9 +90,14 @@ parseBoard =
     Parser.loop [] <|
         \rows ->
             Parser.oneOf
-                [ Parser.succeed (\row -> Loop (row :: rows))
+                [ Parser.succeed (Done rows)
+                    |. Parser.end
+                , Parser.succeed (\row -> Loop (row :: rows))
                     |= parseRow
-                    |. newline
+                    |. Parser.oneOf
+                        [ newline
+                        , Parser.succeed ()
+                        ]
                 , Parser.succeed ()
                     |> Parser.map (\_ -> Done (List.reverse rows))
                 ]
