@@ -94,9 +94,9 @@ parseBoards =
             Parser.succeed (\board next -> next (board :: boards))
                 |= parseBoard
                 |= Parser.oneOf
-                    [ Parser.succeed Loop
+                    [ Parser.succeed (Done << List.reverse)
                         |. Parser.end
-                    , Parser.succeed (Done << List.reverse)
+                    , Parser.succeed Loop
                     ]
 
 
