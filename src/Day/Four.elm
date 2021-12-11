@@ -13,8 +13,8 @@ testInput =
 22 13 17 11  0
  8  2 23  4 24
 
-22 13 17 11  0
- 8  2 23  4 24"""
+ 9 18 17 21  0
+18  2 23 24 24"""
 
 
 
@@ -41,6 +41,8 @@ partOne fileContents =
     let
         parsedInput =
             testInput
+                |> String.filter (\c -> c /= '\u{000D}')
+                |> Debug.log "input"
                 |> Parser.run parseInput
                 |> Debug.log "parsedInput"
     in
@@ -67,7 +69,6 @@ parseInput =
         |= parseDrawNumbers
         |. Parser.spaces
         |= parseBoards
-        |. Parser.end
 
 
 parseDrawNumbers : Parser (List Int)
@@ -90,48 +91,48 @@ parseBoards : Parser (List Board)
 parseBoards =
     Parser.loop [] <|
         \boards ->
-            Parser.oneOf
-                [ -- Parser.succeed (Done (List.reverse boards))
-                  -- |. Parser.end
-                  Parser.succeed (\board -> Loop (board :: boards))
-                    |= parseBoard
-                , Parser.succeed ()
-                    |> Parser.map (\_ -> Done (List.reverse boards))
-                ]
+            Parser.succeed (\board next -> next (board :: boards))
+                |= parseBoard
+                |= Parser.oneOf
+                    [ Parser.succeed Loop
+                        |. Parser.end
+                    , Parser.succeed (Done << List.reverse)
+                    ]
 
 
 parseBoard : Parser Board
 parseBoard =
     Parser.loop [] <|
         \rows ->
-            Parser.oneOf
-                [ Parser.succeed (Done (List.reverse rows))
-                    |. Parser.end
-                , Parser.succeed (\row -> Loop (row :: rows))
-                    |= parseRow
-                    |. Parser.oneOf
-                        [ newline
-                        , Parser.succeed ()
-                        ]
-
-                -- , Parser.succeed ()
-                --     |> Parser.map (\_ -> Done (List.reverse rows))
-                ]
+            Parser.succeed (\row next -> next (row :: rows))
+                |= parseRow
+                |= Parser.oneOf
+                    [ Parser.succeed (Done << List.reverse)
+                        |. newline
+                    , Parser.succeed Loop
+                    ]
 
 
 parseRow : Parser Row
 parseRow =
     Parser.loop [] <|
         \numbers ->
-            Parser.oneOf
-                [ Parser.succeed (\num -> Loop (num :: numbers))
-                    |. Parser.chompWhile (\c -> c == ' ')
-                    |= Parser.int
-                , Parser.succeed ()
-                    |> Parser.map (\_ -> Done (List.reverse numbers))
-                ]
+            Parser.succeed (\num next -> next (num :: numbers))
+                |. Parser.chompWhile (\c -> c == ' ')
+                |= Parser.int
+                |= Parser.oneOf
+                    [ Parser.succeed (Done << List.reverse)
+                        |. newline
+                    , Parser.succeed Loop
+                        |. Parser.symbol " "
+                    ]
 
 
 newline : Parser ()
 newline =
-    Parser.chompIf (\c -> c == '\n' || c == '\u{000D}')
+    Parser.chompIf isNewline
+
+
+isNewline : Char -> Bool
+isNewline char =
+    char == '\n'
